@@ -31,11 +31,27 @@
         },
         methods: {
             login() {
+                console.log("执行login方法")
                 this.$refs["loginForm"].validate((valid) => {
                     if (valid) {
-                        console.log("success")
+                        this.$axios.post("/login",
+                                {username: this.loginForm.username, password: this.loginForm.password})
+                            .then(response => {
+                                if (response.data.success) {
+                                    this.$router.replace({path: "/index"})
+                                }
+                            })
+                            .catch(error => {
+                                this.$message({
+                                    type: 'fail',
+                                    text: error.data.msg
+                                })
+                            })
                     } else {
-                        console.log("fail")
+                        this.$message({
+                            type: 'fail',
+                            text: "服务器异常"
+                        })
                     }
                 });
             }
