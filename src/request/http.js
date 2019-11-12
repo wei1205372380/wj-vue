@@ -15,7 +15,7 @@ import {Message} from "element-ui";
 
 // 环境切换
 // if (process.env.NODE_ENV === "development") {
-//     axios.defaults.baseURL = "api";
+//     axios.defaults.baseURL = "/apis";
 // } else if (process.env.NODE_ENV === "debug") {
 //     axios.defaults.baseURL = "";
 // } else if (process.env.NODE_ENV === "production") {
