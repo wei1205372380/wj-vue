@@ -19,6 +19,8 @@
 </template>
 
 <script>
+    import { apiAddress } from "../request/api"
+
     export default {
         data() {
             return {
@@ -32,21 +34,26 @@
         methods: {
             login() {
                 console.log("执行login方法")
+                apiAddress()
+                    .then(res => {
+                        console.log(res.response.status)
+                    });
                 this.$refs["loginForm"].validate((valid) => {
                     if (valid) {
-                        this.$axios.post("/login",
-                                {username: this.loginForm.username, password: this.loginForm.password})
-                            .then(response => {
-                                if (response.data.success) {
-                                    this.$router.replace({path: "/index"})
-                                }
-                            })
-                            .catch(error => {
-                                this.$message({
-                                    type: 'fail',
-                                    text: error.data.msg
-                                })
-                            })
+                        // this.$axios.post("/login",
+                        //         {username: this.loginForm.username, password: this.loginForm.password})
+                        //     .then(response => {
+                        //         if (response.data.success) {
+                        //             this.$router.replace({path: "/index"})
+                        //         }
+                        //     })
+                        //     .catch(error => {
+                        //         this.$message({
+                        //             type: 'fail',
+                        //             text: error.data.msg
+                        //         })
+                        //     })
+
                     } else {
                         this.$message({
                             type: 'fail',
