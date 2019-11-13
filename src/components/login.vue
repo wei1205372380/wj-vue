@@ -36,31 +36,31 @@
                 console.log("执行login方法")
                 apiAddress()
                     .then(res => {
-                        console.log(res.response.status)
+                        console.log(res)
                     });
-                this.$refs["loginForm"].validate((valid) => {
-                    if (valid) {
-                        // this.$axios.post("/login",
-                        //         {username: this.loginForm.username, password: this.loginForm.password})
-                        //     .then(response => {
-                        //         if (response.data.success) {
-                        //             this.$router.replace({path: "/index"})
-                        //         }
-                        //     })
-                        //     .catch(error => {
-                        //         this.$message({
-                        //             type: 'fail',
-                        //             text: error.data.msg
-                        //         })
-                        //     })
-
-                    } else {
-                        this.$message({
-                            type: 'fail',
-                            text: "服务器异常"
-                        })
-                    }
-                });
+                // this.$refs["loginForm"].validate((valid) => {
+                //     if (valid) {
+                //         // this.$axios.post("/login",
+                //         //         {username: this.loginForm.username, password: this.loginForm.password})
+                //         //     .then(response => {
+                //         //         if (response.data.success) {
+                //         //             this.$router.replace({path: "/index"})
+                //         //         }
+                //         //     })
+                //         //     .catch(error => {
+                //         //         this.$message({
+                //         //             type: 'fail',
+                //         //             text: error.data.msg
+                //         //         })
+                //         //     })
+                //
+                //     } else {
+                //         this.$message({
+                //             type: 'fail',
+                //             text: "服务器异常"
+                //         })
+                //     }
+                // });
             }
         }
     }
