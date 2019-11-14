@@ -42,7 +42,7 @@
                                 } else {
                                     this.$message({
                                         type: "error",
-                                        message: "用户或密码不正确",
+                                        message: response.data.message,
                                         duration: 1000
                                     });
                                 }
