@@ -18,6 +18,13 @@ module.exports = {
             pathRewrite: {
                 '^/apis': ''//这里理解成用‘/api’代替target里面的地址
             }
+        },
+        '/localServer': {
+            target: 'http://localhost:8099',
+            changeOrigin: true,
+            pathRewrite: {
+                "^/localServer": ''
+            }
         }
     },
 

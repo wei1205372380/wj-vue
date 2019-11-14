@@ -19,7 +19,7 @@
 </template>
 
 <script>
-    import { apiAddress } from "../request/api"
+    import { login } from "../request/api";
 
     export default {
         data() {
@@ -33,34 +33,28 @@
         },
         methods: {
             login() {
-                console.log("执行login方法")
-                apiAddress()
-                    .then(res => {
-                        console.log(res)
-                    });
-                // this.$refs["loginForm"].validate((valid) => {
-                //     if (valid) {
-                //         // this.$axios.post("/login",
-                //         //         {username: this.loginForm.username, password: this.loginForm.password})
-                //         //     .then(response => {
-                //         //         if (response.data.success) {
-                //         //             this.$router.replace({path: "/index"})
-                //         //         }
-                //         //     })
-                //         //     .catch(error => {
-                //         //         this.$message({
-                //         //             type: 'fail',
-                //         //             text: error.data.msg
-                //         //         })
-                //         //     })
-                //
-                //     } else {
-                //         this.$message({
-                //             type: 'fail',
-                //             text: "服务器异常"
-                //         })
-                //     }
-                // });
+                this.$refs["loginForm"].validate((valid) => {
+                    if (valid) {
+                        login({"username": this.loginForm.username, "password": this.loginForm.password})
+                            .then(response => {
+                                if (response.data.success) {
+                                    this.$router.replace({path: "/index"});
+                                } else {
+                                    this.$message({
+                                        type: "error",
+                                        message: "用户或密码不正确",
+                                        duration: 1000
+                                    });
+                                }
+                            })
+                    } else {
+                        this.$message({
+                            type: "warning",
+                            message: "用户名或密码不符合要求",
+                            duration: 1000
+                        });
+                    }
+                });
             }
         }
     }

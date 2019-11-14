@@ -7,22 +7,64 @@
 
 // 引入axios
 import axios from "axios";
-// 引入QS 模块，用来序列化post类型的数据
-import QS from "qs";
 import store from "../vuex/index";
 import router from "../router"
 import { Message } from "element-ui";
 
-// 环境切换
-// if (process.env.NODE_ENV === "development") {
-//     axios.defaults.baseURL = "/apis";
-// } else if (process.env.NODE_ENV === "debug") {
-//     axios.defaults.baseURL = "";
-// } else if (process.env.NODE_ENV === "production") {
-//     axios.defaults.baseURL = "";
-// }
+/**
+ * 提示函数
+ * @param type 提示类型（成功，警告，失败等）
+ * @param msg 提示信息
+ */
+const tip = (type, msg) => {
+    Message({
+        message: msg,
+        duration: 1000,
+        type: type
+    })
+};
 
-console.log(store);
+/**
+ * 跳转到登录页面
+ * 携带当前页面路由，方便后面在成功登录后返回当前页面
+ */
+const toLogin = () => {
+    router.replace({
+        path: "/login",
+        query: {
+            redirect: router.currentRoute.fullPath
+        }
+    })
+};
+
+/**
+ * 请求失败（即响应码不是2开头的情况）后的统一错误处理
+ * @param status 状态码
+ * @param other 其他信息
+ */
+const errorHandle = (status, other) => {
+    switch (status) {
+        // 401: 未登录状态，跳转到登录页面
+        case 401:
+            toLogin();
+            break;
+        // 403: token过期，清除token并跳转到登录页面
+        case 403:
+            tip("warning", "登录过期，请重新登录");
+            localStorage.removeItem("token");
+            store.commit("loginSuccess", null);
+            setTimeout(() => {
+                toLogin();
+            }, 1000);
+            break;
+        // 404: 请求不存在
+        case 404:
+            tip("error", "请求的资源不存在");
+            break;
+        default:
+            tip("error", other);
+    }
+}
 
 // 创建axios实例
 const instance = axios.create({
@@ -40,75 +82,33 @@ instance.interceptors.request.use(
         token && (config.headers.Authorization = token);
         return config;
     },
-    error => {
-        return Promise.error(error);
-    }
+    error => Promise.error(error)
 )
 
 // 响应拦截器
 instance.interceptors.response.use(
-    response => {
-        if (response.status === 200) {
-            return Promise.resolve(response);
-        } else {
-            return Promise.reject(response);
-        }
-    },
+    // 请求成功
+    response => response.status === 200 ? Promise.resolve(response) : Promise.reject(response),
+    // 请求失败
     error => {
-        if (error.response.status) {
-            switch (error.response.status) {
-                // 401: 未登录
-                // 未登录则跳转到登陆页面，并携带当前页面的路径
-                // 在登陆成功后返回当前页面，这一步需要在登录页操作
-                case 401:
-                    console.log("401");
-                    router.replace({
-                        path: "/login",
-                        query: {redirect: router.currentRoute.fullPath}
-                    });
-                    break;
-                // 403: token过期
-                // 登录过期对用户提示
-                // 清楚本地token和清空vuex中token对象
-                // 跳转登陆页面
-                case 403:
-                    console.log("403");
-                    Message({
-                        type: "warning",
-                        message: "登录过期，请重新登录",
-                        duration: 1000
-                    });
-                    // 清除本地token
-                    localStorage.removeItem("token");
-                    store.commit("loginSuccess", null);
-                    // 跳转登陆页面，并将要浏览的页面fullPath传过去，登录成功后跳转需要访问的页面
-                    setTimeout(() => {
-                        router.replace({
-                            path: "/login",
-                            query: {redirect: router.currentRoute.fullPath}
-                        })
-                    }, 1000);
-                    break;
-                // 404: 请求不存在
-                case 404:
-                    Message({
-                        type: "error",
-                        message: "网络请求不存在",
-                        duration: 1500
-                    });
-                    break;
-                // 其他错误，直接抛出错误提示
-                default:
-                    Message({
-                        type: "error",
-                        message: error.response.data.message,
-                        duration: 1500
-                    })
+        const { response } = error;
+        if (response) {
+            // 请求已发出，但是响应码不是2**
+            errorHandle(response.status, response.data.message);
+            return Promise.reject(response);
+        } else {
+            // 请求未发出，这里暂时统一作断网处理
+            // eg:请求超时或断网时，更新state的network状态
+            // network状态在app.vue中控制着一个全局的断网提示组件的显示隐藏
+            // 关于断网组件中的刷新重新获取数据，会在断网组件中说明
+            if (!window.navigator.onLine) {
+                store.commit('changeNetwork', false);
+            } else {
+                return Promise.reject(error);
             }
-            return Promise.reject(error.response);
         }
     }
-)
+);
 
 export default instance;
 
