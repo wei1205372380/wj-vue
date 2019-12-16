@@ -3,7 +3,9 @@ import Vue from "vue"
 
 Vue.use(Vuex);
 
-const stroe =  new Vuex.Store({});
+const store =  new Vuex.Store({
+    state: {}
+});
 
-export default stroe;
+export default store;
 

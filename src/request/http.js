@@ -10,6 +10,7 @@ import axios from "axios";
 import store from "../vuex/index";
 import router from "../router"
 import { Message } from "element-ui";
+import storage from "./localStorage";
 
 /**
  * 提示函数
@@ -30,7 +31,7 @@ const tip = (type, msg) => {
  */
 const toLogin = () => {
     router.replace({
-        path: "/login",
+        path: "/",
         query: {
             redirect: router.currentRoute.fullPath
         }
@@ -51,8 +52,7 @@ const errorHandle = (status, other) => {
         // 403: token过期，清除token并跳转到登录页面
         case 403:
             tip("warning", "登录过期，请重新登录");
-            localStorage.removeItem("token");
-            store.commit("loginSuccess", null);
+            storage.removeToken();
             setTimeout(() => {
                 toLogin();
             }, 1000);
@@ -64,7 +64,7 @@ const errorHandle = (status, other) => {
         default:
             tip("error", other);
     }
-}
+};
 
 // 创建axios实例
 const instance = axios.create({
@@ -78,17 +78,19 @@ instance.interceptors.request.use(
     config => {
         // 每次发送请求之前判断是否都存在token，如果存在，则统一在http请求的header加上token，不用每次请求都手动添加
         // 即使本地存在token，也有可能token是过期的，所以在响应拦截器中要对返回状态进行判断
-        const token = store.state.token;
-        token && (config.headers.Authorization = token);
+        const token = storage.getToken();
+        token && (config.headers.token = token);
         return config;
     },
     error => Promise.error(error)
-)
+);
 
 // 响应拦截器
 instance.interceptors.response.use(
     // 请求成功
-    response => response.status === 200 ? Promise.resolve(response) : Promise.reject(response),
+    response => {
+        return response.status === 200 ? Promise.resolve(response) : Promise.reject(response);
+    },
     // 请求失败
     error => {
         const { response } = error;

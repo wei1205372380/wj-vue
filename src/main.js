@@ -5,6 +5,12 @@ import App from './App'
 import router from './router'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import store from "./vuex";
+import Vuex from "vuex";
+import global_variable from "./components/global_variable";
+
+Vue.prototype.GLOBAL = global_variable;
+Vue.use(Vuex);
 
 Vue.use(ElementUI);
 
@@ -12,8 +18,9 @@ Vue.config.productionTip = false
 
 /* eslint-disable no-new */
 new Vue({
-  el: '#app',
-  router,
-  components: { App },
-  template: '<App/>'
+    el: '#app',
+    router,
+    store,
+    components: { App },
+    template: '<App/>'
 })

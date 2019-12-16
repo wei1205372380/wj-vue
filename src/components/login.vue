@@ -13,13 +13,14 @@
             <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 50px">
                 <el-checkbox style="color: #505458" v-model="checked">记住密码</el-checkbox>
             </div>
-            <el-button type="primary" style="width: 100%; background-color: #505458" @click="login()">登录</el-button>
+            <el-button type="primary" style="width: 100%; background-color: #505458" @click="login()" :disabled="isDisable">登录</el-button>
         </el-form>
     </body>
 </template>
 
 <script>
     import { login } from "../request/api";
+    import storage from "../request/localStorage";
 
     export default {
         data() {
@@ -28,17 +29,32 @@
                     username: '',
                     password: ''
                 },
-                checked: true
+                checked: true,
+                isDisable: false
             }
         },
         methods: {
             login() {
+                this.isDisable = true;
+                setTimeout(() => {
+                    this.isDisable = false;
+                }, 2000);
+
                 this.$refs["loginForm"].validate((valid) => {
                     if (valid) {
                         login({"username": this.loginForm.username, "password": this.loginForm.password})
                             .then(response => {
                                 if (response.data.success) {
-                                    this.$router.replace({path: "/index"});
+                                    storage.setToken(response.data.data[0]);
+                                    console.log(response.data.data);
+                                    localStorage.setItem("userId", response.data.data[1]);
+                                    localStorage.setItem("username", this.loginForm.username);
+                                    let redirect = this.$route.query.redirect;
+                                    if (redirect) {
+                                        this.$router.replace({path: redirect});
+                                    } else {
+                                        this.$router.replace({path: "/home"});
+                                    }
                                 } else {
                                     this.$message({
                                         type: "error",
